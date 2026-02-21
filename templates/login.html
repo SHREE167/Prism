@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism - Log In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stars.css') }}">
+</head>
+<body>
+    <div class="stars">
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+        <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
+    </div>
+    
+    <div class="app-container" style="max-width: 440px;">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon"><img src="{{ url_for('static', filename='prism_logo.png') }}" alt="Prism Logo" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;"></span>
+                <h1>Prism</h1>
+            </div>
+            <p class="subtitle">Welcome Back</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-container">
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('login') }}" method="POST" class="dynamic-form glass-panel">
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" name="email" id="email" placeholder="you@example.com" required>
+            </div>
+            <div class="input-group fade-in-up">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="action-btn download-btn">
+                <span class="btn-text">Sign In</span>
+                <span class="btn-icon">➜</span>
+            </button>
+        </form>
+
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+            Don't have an account? <a href="{{ url_for('signup') }}" style="color: var(--accent); font-weight: 600; text-decoration: none;">Sign up here</a>
+        </p>
+    </div>
+
+    <!-- Theme Manager -->
+    <script>
+        const savedTheme = localStorage.getItem('prism-theme');
+        const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+</body>
+</html>

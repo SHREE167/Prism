@@ -22,6 +22,17 @@
         <div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div>
     </div>
     <div class="app-container">
+        <!-- Auth Button -->
+        {% if user_email %}
+        <a href="{{ url_for('logout') }}" class="auth-btn" aria-label="Log Out">
+            <span style="margin-right:0.4rem;">👋</span> Log Out
+        </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="auth-btn" aria-label="Log In">
+            <span style="margin-right:0.4rem;">👤</span> Log In
+        </a>
+        {% endif %}
+
         <!-- Theme Toggle Button -->
         <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
             <!-- Sun Icon (shown in dark mode) -->
@@ -48,6 +59,11 @@
                 <h1>Prism</h1>
             </div>
             <p class="subtitle">Your All-in-One Media Downloader</p>
+            {% if user_email %}
+            <div style="margin-top: 0.8rem; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                <span style="color: var(--text-muted);">Logged in as <strong style="color: var(--text-main);">{{ user_email }}</strong></span>
+            </div>
+            {% endif %}
         </header>
 
         <!-- Flash Messages Block -->
@@ -84,10 +100,17 @@
                             {% endfor %}
                         </select>
                     </div>
+                    {% if user_email %}
                     <button type="submit" name="action" value="download" class="action-btn download-btn" id="downloadBtn">
                         <span class="btn-text">Download Medium</span>
                         <span class="btn-icon">⬇</span>
                     </button>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="action-btn download-btn" style="text-decoration: none; text-align: center; justify-content: center; display: inline-flex;">
+                        <span class="btn-text">Log In to Download</span>
+                        <span class="btn-icon">🔒</span>
+                    </a>
+                    {% endif %}
                     <p style="margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
                         💡 <strong>Tip:</strong> For best playback, open downloaded videos with <strong>VLC Media Player</strong> — Windows Media Player may not play all codecs.
                     </p>
@@ -125,10 +148,17 @@
                     </div>
 
                 {% else %}
+                    {% if user_email %}
                     <button type="submit" name="action" value="fetch" class="action-btn fetch-btn">
                         <span class="btn-text">Analyze Formats</span>
                         <span class="btn-icon">🔍</span>
                     </button>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="action-btn fetch-btn" style="text-decoration: none; text-align: center; justify-content: center; display: inline-flex;">
+                        <span class="btn-text">Log In to Analyze</span>
+                        <span class="btn-icon">🔒</span>
+                    </a>
+                    {% endif %}
                 {% endif %}
             </form>
         </section>
@@ -146,10 +176,17 @@
                     <input type="number" name="count" id="count" value="10" min="1" max="50" required>
                 </div>
 
+                {% if user_email %}
                 <button type="submit" class="action-btn search-btn">
                     <span class="btn-text">Fetch Images</span>
                     <span class="btn-icon">✨</span>
                 </button>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="action-btn search-btn" style="text-decoration: none; text-align: center; justify-content: center; display: inline-flex;">
+                    <span class="btn-text">Log In to Fetch</span>
+                    <span class="btn-icon">🔒</span>
+                </a>
+                {% endif %}
             </form>
         </section>
     </div>
