@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism Media Fetcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon"><img id="app-logo" src="/static/prism_logo.png" alt="Prism Logo" style="width:36px;height:36px;object-fit:contain;vertical-align:middle;"></span>
+                <h1>Prism</h1>
+            </div>
+            <p class="subtitle">Your All-in-One Media Downloader</p>
+        </header>
+
+        <!-- Flash Messages Block -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-container">
+            {% for category, message in messages %}
+              <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Tab Controls -->
+        <div class="tab-controls">
+            <button class="tab-btn {% if not active_tab or active_tab == 'video' %}active{% endif %}" onclick="switchTab('video-section')">🎥 Video Fetcher</button>
+            <button class="tab-btn {% if active_tab == 'image' %}active{% endif %}" onclick="switchTab('image-section')">🖼️ Image Search</button>
+        </div>
+
+        <!-- Video Fetcher Section -->
+        <section id="video-section" class="tab-content {% if not active_tab or active_tab == 'video' %}active{% endif %}">
+            <form action="{{ url_for('handle_video') }}" method="POST" class="dynamic-form glass-panel" id="videoForm">
+                <div class="input-group">
+                    <label for="url">Target URL</label>
+                    <input type="url" name="url" id="url" placeholder="Paste YouTube link here..." value="{{ url or '' }}" required>
+                </div>
+
+                {% if formats %}
+                    <div class="input-group fade-in-up">
+                        <label for="format">Select Quality Format</label>
+                        <select name="format" id="format" class="custom-select" required>
+                            {% for fmt in formats %}
+                                <option value="{{ fmt.format_id }}">{{ fmt.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" name="action" value="download" class="action-btn download-btn" id="downloadBtn">
+                        <span class="btn-text">Download Medium</span>
+                        <span class="btn-icon">⬇</span>
+                    </button>
+                    <p style="margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                        💡 <strong>Tip:</strong> For best playback, open downloaded videos with <strong>VLC Media Player</strong> — Windows Media Player may not play all codecs.
+                    </p>
+
+                    <!-- Progress Bar (shown after clicking download) -->
+                    <div id="progress-container" class="progress-wrapper" style="display: none; margin-top: 1.5rem;">
+                        <div class="progress-labels">
+                            <span id="progress-status" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Starting...</span>
+                            <span id="progress-text" style="font-size: 0.9rem; color: var(--accent); font-weight: 800;">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                {% elif waiting %}
+                    <!-- Waiting state: progress bar while download runs -->  
+                    <div class="progress-wrapper" style="margin-top: 1.5rem;">
+                        <div class="progress-labels">
+                            <span id="progress-status" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Starting...</span>
+                            <span id="progress-text" style="font-size: 0.9rem; color: var(--accent); font-weight: 800;">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progress-fill" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Shown after download finishes -->
+                    <div id="done-actions" style="display:none; margin-top:1.5rem; text-align:center;">
+                        <p id="done-msg" style="color:#10b981; font-weight:700; margin-bottom:1rem;">File download started automatically!</p>
+                        <a href="/" class="action-btn fetch-btn" style="text-decoration:none; display:inline-flex; gap:0.5rem; align-items:center;">
+                            <span>Download Another Video</span>
+                            <span>&#8635;</span>
+                        </a>
+                    </div>
+
+                {% else %}
+                    <button type="submit" name="action" value="fetch" class="action-btn fetch-btn">
+                        <span class="btn-text">Analyze Formats</span>
+                        <span class="btn-icon">🔍</span>
+                    </button>
+                {% endif %}
+            </form>
+        </section>
+
+        <!-- Image Fetcher Section -->
+        <section id="image-section" class="tab-content {% if active_tab == 'image' %}active{% endif %}">
+            <form action="{{ url_for('handle_images') }}" method="POST" class="dynamic-form glass-panel">
+                <div class="input-group">
+                    <label for="query">Search Query</label>
+                    <input type="text" name="query" id="query" placeholder="e.g., cyberpunk cityscapes" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="count">Image Limit (Max 50)</label>
+                    <input type="number" name="count" id="count" value="10" min="1" max="50" required>
+                </div>
+
+                <button type="submit" class="action-btn search-btn">
+                    <span class="btn-text">Fetch Images</span>
+                    <span class="btn-icon">✨</span>
+                </button>
+            </form>
+        </section>
+    </div>
+
+    <script>
+        // ── Tab switching ──────────────────────────────
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'video-section') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+
+        // ── Progress helpers ───────────────────────────
+        function setProgress(pct, msg) {
+            const fill = document.getElementById('progress-fill');
+            const text = document.getElementById('progress-text');
+            const status = document.getElementById('progress-status');
+            if (fill) fill.style.width = pct + '%';
+            if (text) text.innerText = pct.toFixed(1) + '%';
+            if (status) status.innerText = msg;
+        }
+
+        function markDone() {
+            setProgress(100, 'Download Complete!');
+            const fill = document.getElementById('progress-fill');
+            if (fill) fill.style.backgroundColor = '#10b981';
+        }
+
+        // ── Polling logic (fired only on "waiting" page) ───
+        {% if waiting %}
+        let pollTimer = null;
+
+        function pollProgress() {
+            fetch('/api/progress')
+                .then(r => r.json())
+                .then(data => {
+                    const pct = data.progress || 0;
+                    const msg = data.message || 'Downloading...';
+
+                    setProgress(pct, msg);
+
+                    if (data.status === 'done') {
+                        markDone();
+                        clearInterval(pollTimer);
+                        // Trigger file download automatically
+                        setTimeout(() => {
+                            window.location.href = '/api/download-file';
+                            // Show the done actions div after triggering download
+                            setTimeout(() => {
+                                const doneActions = document.getElementById('done-actions');
+                                if (doneActions) doneActions.style.display = 'block';
+                            }, 1000);
+                        }, 800);
+                    } else if (data.status === 'error') {
+                        setProgress(0, 'Error: ' + (data.error || 'Unknown error'));
+                        clearInterval(pollTimer);
+                    }
+                })
+                .catch(() => {}); // silently ignore transient network errors
+        }
+
+        // Start polling immediately when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            pollTimer = setInterval(pollProgress, 800);
+            pollProgress(); // first call immediately
+        });
+        {% endif %}
+
+        // ── Show progress bar when Download button is clicked ──
+        document.addEventListener('DOMContentLoaded', function() {
+            const dlBtn = document.getElementById('downloadBtn');
+            if (dlBtn) {
+                dlBtn.addEventListener('click', function() {
+                    document.getElementById('progress-container').style.display = 'block';
+                    dlBtn.style.opacity = '0.5';
+                    dlBtn.style.pointerEvents = 'none';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
