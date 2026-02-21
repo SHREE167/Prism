@@ -1,42 +1,112 @@
 /* static/style.css */
 
-:root {
-    --bg-dark: #0f172a;
-    --bg-darker: #020617;
-    --primary-blue: #3b82f6;
-    --primary-indigo: #6366f1;
-    --accent: #22d3ee;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --glass-bg: rgba(30, 41, 59, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.1);
-}
-
+/* Base Typography & Reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* 
+=========================================
+  LIGHT MODE (Default Fallback)
+=========================================
+*/
+:root {
+    /* Backgrounds */
+    --bg-page: #f4f4f5; /* Zinc 100 */
+    --bg-panel: #ffffff;
+    --bg-input: #ffffff;
+    --bg-input-focus: #fafafa;
+    
+    /* Text */
+    --text-main: #18181b; /* Zinc 900 */
+    --text-muted: #52525b; /* Zinc 600 */
+    
+    /* Borders & Accents */
+    --border: #e4e4e7; /* Zinc 200 */
+    --border-focus: #a1a1aa; /* Zinc 400 */
+    
+    /* Brand Buttons */
+    --btn-bg: #18181b;
+    --btn-text: #ffffff;
+    --btn-hover: #27272a;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    /* Progress */
+    --progress-bg: #e4e4e7;
+    --progress-fill: #18181b;
+    --success: #10b981;
+}
+
+/* 
+=========================================
+  DARK MODE (Manually Toggled Class)
+=========================================
+*/
+body.dark-theme {
+    /* Backgrounds */
+    --bg-page: #09090b; /* Zinc 950 */
+    --bg-panel: #18181b; /* Zinc 900 */
+    --bg-input: #27272a; /* Zinc 800 */
+    --bg-input-focus: #3f3f46; /* Zinc 700 */
+    
+    /* Text */
+    --text-main: #fafafa; /* Zinc 50 */
+    --text-muted: #a1a1aa; /* Zinc 400 */
+    
+    /* Borders & Accents */
+    --border: #3f3f46; /* Zinc 700 */
+    --border-focus: #71717a; /* Zinc 500 */
+    
+    /* Brand Buttons */
+    --btn-bg: #fafafa;
+    --btn-text: #18181b;
+    --btn-hover: #e4e4e7;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    
+    /* Progress */
+    --progress-bg: #3f3f46;
+    --progress-fill: #fafafa;
+    --success: #34d399; /* Lighter green for dark mode */
+}
+
+/* 
+=========================================
+  LAYOUT & BASE
+=========================================
+*/
 body {
-    background-color: var(--bg-darker);
+    background-color: var(--bg-page);
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 40%),
-                      radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.15), transparent 40%);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
     width: 100%;
-    max-width: 650px;
+    max-width: 580px; /* Slightly narrower for a sleeker look */
     padding: 2rem;
     animation: fadeIn 0.8s ease-out;
 }
 
+/* 
+=========================================
+  HEADER
+=========================================
+*/
 .header {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -46,243 +116,236 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     margin-bottom: 0.5rem;
 }
 
-.logo-icon {
-    font-size: 2.5rem;
-    animation: float 3s ease-in-out infinite;
+/* Adjust Prism logo icon in dark vs light mode using CSS filters if needed.
+   Currently relies on the image being provided. */
+#app-logo {
+    transition: transform 0.3s ease;
+}
+
+.logo:hover #app-logo {
+    transform: scale(1.05);
 }
 
 .logo h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--primary-indigo));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
+    color: var(--text-main);
 }
 
 .subtitle {
     color: var(--text-muted);
-    font-size: 1.1rem;
-    font-weight: 300;
-    letter-spacing: 0.5px;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0px;
 }
 
-/* Glass Panel */
+/* 
+=========================================
+  PANELS (Replaces Glassmorphism)
+=========================================
+*/
 .glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 16px; /* Crisper border radius */
     padding: 2.5rem;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: var(--shadow-lg);
+    transition: box-shadow 0.3s ease;
 }
 
-.glass-panel:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
-}
-
-/* Tabs */
+/* 
+=========================================
+  TABS
+=========================================
+*/
 .tab-controls {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .tab-btn {
     background: transparent;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
     color: var(--text-muted);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.2rem;
     cursor: pointer;
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .tab-btn:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-input);
 }
 
 .tab-btn.active {
     color: var(--text-main);
-    background: var(--glass-bg);
-    border-color: var(--primary-indigo);
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    background: var(--bg-panel);
+    border-color: var(--border);
+    box-shadow: var(--shadow-sm);
 }
 
 .tab-content {
     display: none;
     opacity: 0;
-    transition: opacity 0.4s ease;
 }
 
 .tab-content.active {
     display: block;
     opacity: 1;
-    animation: slideUp 0.5s ease;
+    animation: fadeIn 0.4s ease;
 }
 
-/* Forms & Inputs */
+/* 
+=========================================
+  FORMS & INPUTS
+=========================================
+*/
 .dynamic-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .input-group label {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 input[type="url"], input[type="text"], input[type="number"], .custom-select {
     width: 100%;
-    padding: 1.2rem;
-    border-radius: 12px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 8px; /* Crisper edges */
+    background: var(--bg-input);
+    border: 1px solid var(--border);
     color: var(--text-main);
     font-size: 1rem;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
 }
 
 input:focus, .custom-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
-    background: rgba(15, 23, 42, 0.9);
+    border-color: var(--border-focus);
+    background: var(--bg-input-focus);
 }
 
+/* Custom Select Dropdown Arrow */
 .custom-select {
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1em;
 }
+
+/* Dropdown text color inside the option list */
 .custom-select option {
-    background: var(--bg-dark);
+    background: var(--bg-panel);
     color: var(--text-main);
 }
 
-/* Buttons */
+/* 
+=========================================
+  BUTTONS
+=========================================
+*/
 .action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     width: 100%;
-    padding: 1.2rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 700;
+    padding: 1rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    color: white;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    transition: all 0.2s ease;
     margin-top: 0.5rem;
-}
-
-.fetch-btn {
-    background: linear-gradient(135deg, var(--primary-indigo), var(--primary-blue));
-    box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.6);
-}
-
-.download-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.6);
-}
-
-.search-btn {
-    background: linear-gradient(135deg, #f43f5e, #e11d48);
-    box-shadow: 0 10px 20px -10px rgba(244, 63, 94, 0.6);
+    box-shadow: var(--shadow-md);
 }
 
 .action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 25px -10px rgba(0, 0, 0, 0.5);
+    background: var(--btn-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 .action-btn:active {
-    transform: translateY(1px);
+    transform: translateY(0px);
+    box-shadow: var(--shadow-sm);
 }
 
-.btn-icon {
-    font-size: 1.2rem;
+/* We override the specific colors since the new design is strictly monochrome */
+.fetch-btn, .download-btn, .search-btn {
+    background: var(--btn-bg);
+}
+.fetch-btn:hover, .download-btn:hover, .search-btn:hover {
+    background: var(--btn-hover);
 }
 
-/* Flash Messages */
+
+/* 
+=========================================
+  FLASH MESSAGES
+=========================================
+*/
 .flash-container {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .flash-message {
-    padding: 1rem;
-    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
     margin-bottom: 0.5rem;
     text-align: center;
-    font-weight: 600;
-    animation: slideDown 0.4s ease-out;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-out;
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
 }
 
 .flash-message.error {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    border-color: #fca5a5;
+    background: rgba(239, 68, 68, 0.05);
 }
 
 .flash-message.warning {
-    background: rgba(245, 158, 11, 0.15);
-    color: #fcd34d;
-    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    border-color: #fcd34d;
+    background: rgba(245, 158, 11, 0.05);
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-    0% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(5deg); }
-    100% { transform: translateY(0px) rotate(0deg); }
-}
-
-.fade-in-up {
-    animation: slideUp 0.6s ease;
-}
-
-/* Progress Bar */
+/* 
+=========================================
+  PROGRESS BAR
+=========================================
+*/
 .progress-wrapper {
     width: 100%;
 }
@@ -290,25 +353,80 @@ input:focus, .custom-select:focus {
 .progress-labels {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+#progress-status {
+    color: var(--text-muted) !important;
+}
+#progress-text {
+    color: var(--text-main) !important;
 }
 
 .progress-bar-bg {
     width: 100%;
-    height: 12px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    height: 8px; /* Thinner, sleeker bar */
+    background: var(--progress-bg);
+    border-radius: 4px;
     overflow: hidden;
-    position: relative;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .progress-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--primary-indigo), var(--accent));
-    border-radius: 10px;
+    background: var(--progress-fill);
+    border-radius: 4px;
     transition: width 0.3s ease, background-color 0.3s ease;
-    box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
 }
+
+/* 
+=========================================
+  ANIMATIONS
+=========================================
+*/
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.theme-toggle-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Hide/Show icons based on theme */
+.moon-icon { display: block; }
+.sun-icon { display: none; }
+
+body.dark-theme .moon-icon { display: none; }
+body.dark-theme .sun-icon { display: block; }
