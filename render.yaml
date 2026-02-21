@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: prism
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: FLASK_SECRET_KEY
+        sync: false
+      - key: API_KEY
+        sync: false
