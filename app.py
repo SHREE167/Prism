@@ -1,17 +1,36 @@
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-from flask import Flask, render_template, request, send_file, flash, redirect, url_for, jsonify
+from flask import Flask, render_template, request, send_file, flash, redirect, url_for, jsonify, session
 import yt_dlp
 import os
 import uuid
 import shutil
 import re
 import threading
+from functools import wraps
 from main import download_images
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "super_secret_media_fetcher_key"
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super_secret_media_fetcher_key")
+
+# Initialize Supabase
+supabase_url = os.environ.get("SUPABASE_URL")
+supabase_key = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(supabase_url, supabase_key)
+
+# Authentication Decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Directories
 VIDEO_DOWNLOAD_DIR = "videos"
@@ -123,12 +142,57 @@ def run_download(url, format_id, output_template):
 # Routes
 # ──────────────────────────────────────────────
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if "user" in session:
+        return redirect(url_for("index"))
+        
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        try:
+            response = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            session["user"] = response.user.id
+            session["email"] = response.user.email
+            return redirect(url_for("index"))
+        except Exception as e:
+            flash(f"Login failed: {str(e)}", "error")
+            return redirect(url_for("login"))
+            
+    return render_template("login.html")
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if "user" in session:
+        return redirect(url_for("index"))
+        
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        try:
+            response = supabase.auth.sign_up({"email": email, "password": password})
+            flash("Account created! You can now log in.", "success")
+            return redirect(url_for("login"))
+        except Exception as e:
+            flash(f"Sign up failed: {str(e)}", "error")
+            return redirect(url_for("signup"))
+            
+    return render_template("signup.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out.", "success")
+    return redirect(url_for("login"))
+
+
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return render_template("index.html", user_email=session.get("email"))
 
 
 @app.route("/video", methods=["POST"])
+@login_required
 def handle_video():
     url = request.form.get("url")
     action = request.form.get("action")
@@ -218,6 +282,7 @@ def api_download_file():
 
 
 @app.route("/images", methods=["POST"])
+@login_required
 def handle_images():
     query = request.form.get("query")
     count = request.form.get("count", 10, type=int)
