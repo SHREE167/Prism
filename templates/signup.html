@@ -42,13 +42,17 @@
         {% endwith %}
 
         <form action="{{ url_for('signup') }}" method="POST" class="dynamic-form glass-panel">
+            <!-- H6 FIX: CSRF token -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
             <div class="input-group">
                 <label for="email">Email Address</label>
                 <input type="email" name="email" id="email" placeholder="you@example.com" required>
             </div>
             <div class="input-group fade-in-up">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" placeholder="••••••••" required>
+                <!-- M3 FIX: Added minlength -->
+                <input type="password" name="password" id="password" placeholder="••••••••" required minlength="6">
             </div>
             <button type="submit" class="action-btn fetch-btn">
                 <span class="btn-text">Sign Up</span>

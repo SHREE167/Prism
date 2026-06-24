@@ -1,9 +1,17 @@
 __pycache__/
+.env
 *.mp4
 *.m4a
 *.webm
 *.mp3
 *.mkv
+*.mhtml
+*.mhtml.part
+*.mhtml.ytdl
+*.part
+*.ytdl
 videos/
 images/
 *.zip
+test_*.py
+append_prompts.py

@@ -230,7 +230,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-input[type="url"], input[type="text"], input[type="number"], .custom-select {
+input[type="url"], input[type="text"], input[type="number"], input[type="email"], input[type="password"], .custom-select {
     width: 100%;
     padding: 1rem;
     border-radius: 8px; /* Crisper edges */

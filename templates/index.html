@@ -86,6 +86,9 @@
         <!-- Video Fetcher Section -->
         <section id="video-section" class="tab-content {% if not active_tab or active_tab == 'video' %}active{% endif %}">
             <form action="{{ url_for('handle_video') }}" method="POST" class="dynamic-form glass-panel" id="videoForm">
+                <!-- H6 FIX: CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                 <div class="input-group">
                     <label for="url">Target URL</label>
                     <input type="url" name="url" id="url" placeholder="Paste YouTube link here..." value="{{ url or '' }}" required>
@@ -165,7 +168,31 @@
 
         <!-- Image Fetcher Section -->
         <section id="image-section" class="tab-content {% if active_tab == 'image' %}active{% endif %}">
+            {% if image_waiting %}
+            <!-- H4 FIX: Image download waiting state with progress polling -->
+            <div class="glass-panel" style="padding: 2.5rem;">
+                <div class="progress-wrapper" style="margin-top: 0;">
+                    <div class="progress-labels">
+                        <span id="img-progress-status" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Searching for images...</span>
+                        <span id="img-progress-text" style="font-size: 0.9rem; color: var(--accent); font-weight: 800;">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="img-progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+                <div id="img-done-actions" style="display:none; margin-top:1.5rem; text-align:center;">
+                    <p style="color:#10b981; font-weight:700; margin-bottom:1rem;">Images downloaded!</p>
+                    <a href="/" class="action-btn fetch-btn" style="text-decoration:none; display:inline-flex; gap:0.5rem; align-items:center;">
+                        <span>Search Again</span>
+                        <span>&#8635;</span>
+                    </a>
+                </div>
+            </div>
+            {% else %}
             <form action="{{ url_for('handle_images') }}" method="POST" class="dynamic-form glass-panel">
+                <!-- H6 FIX: CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                 <div class="input-group">
                     <label for="query">Search Query</label>
                     <input type="text" name="query" id="query" placeholder="e.g., cyberpunk cityscapes" required>
@@ -188,12 +215,12 @@
                 </a>
                 {% endif %}
             </form>
+            {% endif %}
         </section>
     </div>
 
     <script>
         // ── Theme Manager ──────────────────────────────
-        // Check saved theme or system preference immediately
         const savedTheme = localStorage.getItem('prism-theme');
         const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         
@@ -225,22 +252,22 @@
         }
 
         // ── Progress helpers ───────────────────────────
-        function setProgress(pct, msg) {
-            const fill = document.getElementById('progress-fill');
-            const text = document.getElementById('progress-text');
-            const status = document.getElementById('progress-status');
+        function setProgress(fillId, textId, statusId, pct, msg) {
+            const fill = document.getElementById(fillId);
+            const text = document.getElementById(textId);
+            const status = document.getElementById(statusId);
             if (fill) fill.style.width = pct + '%';
             if (text) text.innerText = pct.toFixed(1) + '%';
             if (status) status.innerText = msg;
         }
 
-        function markDone() {
-            setProgress(100, 'Download Complete!');
-            const fill = document.getElementById('progress-fill');
+        function markDone(fillId, textId, statusId) {
+            setProgress(fillId, textId, statusId, 100, 'Download Complete!');
+            const fill = document.getElementById(fillId);
             if (fill) fill.style.backgroundColor = '#10b981';
         }
 
-        // ── Polling logic (fired only on "waiting" page) ───
+        // ── Polling logic for VIDEO downloads ───────────
         {% if waiting %}
         let pollTimer = null;
 
@@ -251,32 +278,66 @@
                     const pct = data.progress || 0;
                     const msg = data.message || 'Downloading...';
 
-                    setProgress(pct, msg);
+                    setProgress('progress-fill', 'progress-text', 'progress-status', pct, msg);
 
                     if (data.status === 'done') {
-                        markDone();
+                        markDone('progress-fill', 'progress-text', 'progress-status');
                         clearInterval(pollTimer);
-                        // Trigger file download automatically
                         setTimeout(() => {
                             window.location.href = '/api/download-file';
-                            // Show the done actions div after triggering download
                             setTimeout(() => {
                                 const doneActions = document.getElementById('done-actions');
                                 if (doneActions) doneActions.style.display = 'block';
                             }, 1000);
                         }, 800);
                     } else if (data.status === 'error') {
-                        setProgress(0, 'Error: ' + (data.error || 'Unknown error'));
+                        setProgress('progress-fill', 'progress-text', 'progress-status', 0, 'Error: ' + (data.error || 'Unknown error'));
                         clearInterval(pollTimer);
                     }
                 })
-                .catch(() => {}); // silently ignore transient network errors
+                .catch(() => {});
         }
 
-        // Start polling immediately when page loads
         document.addEventListener('DOMContentLoaded', function() {
             pollTimer = setInterval(pollProgress, 800);
-            pollProgress(); // first call immediately
+            pollProgress();
+        });
+        {% endif %}
+
+        // ── Polling logic for IMAGE downloads (H4 FIX) ──
+        {% if image_waiting %}
+        let imgPollTimer = null;
+
+        function pollImageProgress() {
+            fetch('/api/progress')
+                .then(r => r.json())
+                .then(data => {
+                    const pct = data.progress || 0;
+                    const msg = data.message || 'Searching...';
+
+                    setProgress('img-progress-fill', 'img-progress-text', 'img-progress-status', pct, msg);
+
+                    if (data.status === 'done') {
+                        markDone('img-progress-fill', 'img-progress-text', 'img-progress-status');
+                        clearInterval(imgPollTimer);
+                        setTimeout(() => {
+                            window.location.href = '/api/download-file';
+                            setTimeout(() => {
+                                const doneActions = document.getElementById('img-done-actions');
+                                if (doneActions) doneActions.style.display = 'block';
+                            }, 1000);
+                        }, 800);
+                    } else if (data.status === 'error') {
+                        setProgress('img-progress-fill', 'img-progress-text', 'img-progress-status', 0, 'Error: ' + (data.error || 'Unknown error'));
+                        clearInterval(imgPollTimer);
+                    }
+                })
+                .catch(() => {});
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            imgPollTimer = setInterval(pollImageProgress, 800);
+            pollImageProgress();
         });
         {% endif %}
 
