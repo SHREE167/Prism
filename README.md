@@ -1,4 +1,4 @@
-# Prism Media Fetcher 🌈
+# Prism Media Fetcher 
 
 Prism is a sleek, modern web application built with Python and Flask that allows you to easily download videos from YouTube in various resolutions and batch download images from Google Search. It features a secure authentication system powered by Supabase and a beautiful UI with Dark/Light mode support.
 
